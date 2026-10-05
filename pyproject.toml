@@ -38,10 +38,13 @@ quote-style = 'single'
 pythonpath = "."
 addopts = '-p no:warnings'
 
-[tool.taskipy.tasks] 
+
+[tool.taskipy.tasks]
+run = 'fastapi dev fast_zero/app.py --reload'
 lint = "ruff check ."
 pre_format = "ruff check . --fix"
 format = "ruff format ."
 pre_test = "task lint"
 test = "pytest --cov=fast_zero -vv"
 post_test = "coverage html"
+html = "start htmlcov\\index.html"
