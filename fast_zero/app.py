@@ -9,12 +9,42 @@ app = FastAPI(title='API teste')
 database = []
 
 
-@app.get('/', status_code=HTTPStatus.OK, response_model=Message)
+@app.get('/', status_code=HTTPStatus.OK, response_model=Message, tags=['User'])
 async def read_root():
     return {'message': 'teste'}
 
 
-@app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
+@app.get(
+    '/users/',
+    status_code=HTTPStatus.OK,
+    response_model=UserList,
+    tags=['User'],
+)
+async def read_users():
+    return {'users': database}
+
+
+@app.get(
+    '/users/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublic,
+    tags=['User'],
+)
+async def get_user(user_id: int):
+    if user_id > len(database) or user_id < 1:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='User not found'
+        )
+
+    return database[user_id - 1]
+
+
+@app.post(
+    '/users/',
+    status_code=HTTPStatus.CREATED,
+    response_model=UserPublic,
+    tags=['User'],
+)
 async def create_user(user: UserSchema):
     user_with_id = UserDB(**user.model_dump(), id=len(database) + 1)
 
@@ -23,13 +53,11 @@ async def create_user(user: UserSchema):
     return user_with_id
 
 
-@app.get('/users/', status_code=HTTPStatus.OK, response_model=UserList)
-async def read_users():
-    return {'users': database}
-
-
 @app.put(
-    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic
+    '/users/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=UserPublic,
+    tags=['User'],
 )
 async def update_user(user_id: int, user: UserSchema):
     if user_id > len(database) or user_id < 1:
@@ -44,7 +72,10 @@ async def update_user(user_id: int, user: UserSchema):
 
 
 @app.delete(
-    '/users/{user_id}', status_code=HTTPStatus.OK, response_model=Message
+    '/users/{user_id}',
+    status_code=HTTPStatus.OK,
+    response_model=Message,
+    tags=['User'],
 )
 async def delete_user(user_id: int):
     if user_id > len(database) or user_id < 1:
